@@ -1,7 +1,11 @@
-FROM node:21-alpine
+FROM node:18-alpine
+WORKDIR /app
 
 EXPOSE 8080
-COPY shared-editor-backend/package*.json ./
+COPY package*.json ./
 RUN npm install
-COPY shared-editor-backend/* .
+COPY . .
+
+RUN npm run build
+
 ENTRYPOINT ["npm", "start"]
