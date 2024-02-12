@@ -1,8 +1,23 @@
 version: '3.8'
 
 services:
+#  shared-editor-backend:
+#    container_name: SharedEditor-backend
+#    build:
+#      context: .
+#      dockerfile: shared-editor-backend/Dockerfile
+#    restart: on-failure
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      DATABASE_USER: "postgres"
+#      DATABASE_PASSWORD: "postgres"
+#      DATABASE_HOST: documents-database,
+#      DATABASE_PORT: 5432,
+#      DATABASE_NAME: "documents_database"
+
   documents-database:
-    container_name: documents-database
+    container_name: DocumentsDatabase
     build:
       context: .
       dockerfile: Databases/DocumentsDatabase/Dockerfile
