@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+#  shared-editor-frontend:
+#    container_name: SharedEditor-frontend
+#    build:
+#      context: shared-editor-frontend
+#      dockerfile: Dockerfile
+#    restart: on-failure
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      API_HOST: shared-editor-backend
+#      API_PORT: 8080
+#    networks:
+#      - shared-editor-network
+
   shared-editor-backend:
     container_name: SharedEditor-backend
     build:
@@ -13,10 +27,11 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: documents-database
-      DATABASE_PORT: 5432,
+      DATABASE_PORT: 5432
       DATABASE_NAME: documents_database
     networks:
       - documents-database-network
+#      - shared-editor-network
 
   documents-database:
     container_name: documents-database
@@ -34,5 +49,5 @@ services:
       - documents-database-network
 
 networks:
-    documents-database-network:
-
+  documents-database-network:
+#  shared-editor-network:

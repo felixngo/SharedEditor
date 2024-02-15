@@ -7,4 +7,8 @@ import { DocumentsDto } from '../../Models/Dto/documentsDto';
 export class DocumentsRepository extends GenericRepository<
   DocumentsEntity,
   DocumentsDto
-> {}
+> {
+  constructor() {
+    super(DocumentsEntity);
+  }
+}

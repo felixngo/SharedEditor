@@ -10,11 +10,18 @@ export class GenericRepository<
   TEntity extends Model<documentsAttributes, documentsCreationAttributes>,
   TModel extends IObjectWithId,
 > {
-  constructor(private readonly model: ModelStatic<TEntity>) {}
+  model: ModelStatic<TEntity>;
+  constructor(model: ModelStatic<TEntity>) {
+    this.model = model;
+  }
 
   async get(): Promise<TModel[]> {
     try {
       const entities = await this.model.findAll();
+
+      if (!entities) {
+        return [];
+      }
       return entities.map(
         (entity) => entity.toJSON() as IObjectWithId as TModel,
       );

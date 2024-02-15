@@ -4,14 +4,14 @@ import { DataTypes, Model, Optional } from 'sequelize';
 export interface documentsAttributes {
   id: number;
   title: string;
-  content: string;
-  created_at?: Date;
-  updated_at?: Date;
+  content: JSON;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export type documentsPk = 'id';
 export type documentsId = DocumentsEntity[documentsPk];
-export type documentsOptionalAttributes = 'id' | 'created_at' | 'updated_at';
+export type documentsOptionalAttributes = 'id' | 'createdAt' | 'updatedAt';
 export type documentsCreationAttributes = Optional<
   documentsAttributes,
   documentsOptionalAttributes
@@ -23,9 +23,9 @@ export class DocumentsEntity
 {
   id!: number;
   title!: string;
-  content!: string;
-  created_at?: Date;
-  updated_at?: Date;
+  content!: JSON;
+  createdAt?: Date;
+  updatedAt?: Date;
 
   static initModel(sequelize: Sequelize.Sequelize): typeof DocumentsEntity {
     return DocumentsEntity.init(
@@ -41,15 +41,25 @@ export class DocumentsEntity
           allowNull: false,
         },
         content: {
-          type: DataTypes.TEXT,
+          type: DataTypes.JSON,
           allowNull: false,
+        },
+        createdAt: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          defaultValue: Date.now(),
+        },
+        updatedAt: {
+          type: DataTypes.DATE,
+          allowNull: true,
+          defaultValue: Date.now(),
         },
       },
       {
         sequelize,
         tableName: 'documents',
         schema: 'public',
-        timestamps: true,
+        timestamps: false,
         indexes: [
           {
             name: 'documents_pkey',
