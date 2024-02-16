@@ -6,7 +6,7 @@ export class DocumentsDto {
   updated_at?: Date;
 
   constructor(
-    id: number,
+    id: number | undefined,
     title: string,
     content: JSON,
     created_at: Date,

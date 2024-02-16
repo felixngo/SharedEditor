@@ -1,20 +1,6 @@
 version: '3.8'
 
 services:
-#  shared-editor-frontend:
-#    container_name: SharedEditor-frontend
-#    build:
-#      context: shared-editor-frontend
-#      dockerfile: Dockerfile
-#    restart: on-failure
-#    ports:
-#      - "3000:3000"
-#    environment:
-#      API_HOST: shared-editor-backend
-#      API_PORT: 8080
-#    networks:
-#      - shared-editor-network
-
   shared-editor-backend:
     container_name: SharedEditor-backend
     build:
@@ -31,7 +17,8 @@ services:
       DATABASE_NAME: documents_database
     networks:
       - documents-database-network
-#      - shared-editor-network
+    depends_on:
+      - documents-database
 
   documents-database:
     container_name: documents-database
@@ -50,4 +37,4 @@ services:
 
 networks:
   documents-database-network:
-#  shared-editor-network:
+

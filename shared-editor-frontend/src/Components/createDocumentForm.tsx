@@ -6,9 +6,9 @@ export default function CreateDocumentForm() {
     const navigate = useNavigate();
 
     const onClick = () => {
-        createDocument("").then(response => {
-            console.log(response);
-            navigate(`/docs/${response!.data.id}`);
+        createDocument("").then(doc => {
+            console.log(doc);
+            navigate(`/docs/${doc.id}`);
         });
     }
 

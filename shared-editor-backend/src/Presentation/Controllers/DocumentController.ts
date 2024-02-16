@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Logger, Param, Post } from "@nestjs/common";
 import { DocumentsDto } from '../../Models/Dto/documentsDto';
 import { DocumentsBusiness } from '../../Business/DocumentsBusiness';
 
@@ -22,5 +22,11 @@ export class DocumentController {
     const response = await this.business.getAllDocuments();
     Logger.log(`[Controller] Returning ${response.length} documents`);
     return response;
+  }
+
+  @Get('/document/:id')
+  async getDocument(@Param('id') id: number): Promise<DocumentsDto> {
+    Logger.log(`[Controller] Getting document with id ${id}`);
+    return await this.business.getDocument(id);
   }
 }

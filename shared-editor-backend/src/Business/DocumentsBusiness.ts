@@ -1,18 +1,42 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { DocumentsRepository } from '../DataAccess/Repositories/DocumentsRepository';
 import { DocumentsDto } from '../Models/Dto/documentsDto';
+import { exampleSetup } from 'prosemirror-example-setup';
+import { EditorState } from 'prosemirror-state';
+import { Schema, DOMParser } from 'prosemirror-model';
+import { addListNodes } from 'prosemirror-schema-list';
+import { schema } from 'prosemirror-schema-basic';
 
 @Injectable()
 export class DocumentsBusiness {
   repository: DocumentsRepository;
+  schema: Schema;
 
   constructor(@Inject(DocumentsRepository) repository) {
     this.repository = repository;
+    this.schema = new Schema({
+      nodes: addListNodes(schema.spec.nodes, 'paragraph block*', 'block'),
+      marks: schema.spec.marks,
+    });
   }
 
   async createDocument(title: string): Promise<DocumentsDto> {
+    const content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+        },
+      ],
+    };
     return await this.repository.create(
-      new DocumentsDto(0, title, {} as JSON, new Date(), new Date()),
+      new DocumentsDto(
+        undefined,
+        title,
+        content as any,
+        new Date(),
+        new Date(),
+      ),
     );
   }
 
