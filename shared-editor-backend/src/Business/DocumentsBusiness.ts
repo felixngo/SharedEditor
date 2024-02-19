@@ -8,13 +8,18 @@ import { schema } from 'prosemirror-schema-basic';
 import { Step } from 'prosemirror-transform';
 import { Socket } from 'socket.io';
 
+interface StateDict {
+  [id: number]: {
+    state: EditorState;
+    timeout: NodeJS.Timeout | null;
+  };
+}
 @Injectable()
 export class DocumentsBusiness {
   repository: DocumentsRepository;
   schema: Schema;
   debounceDuration: number;
-  lastState: EditorState | null;
-  timeout: NodeJS.Timeout | null;
+  stateDict: StateDict;
 
   constructor(@Inject(DocumentsRepository) repository) {
     this.repository = repository;
@@ -23,6 +28,7 @@ export class DocumentsBusiness {
       marks: schema.spec.marks,
     });
     this.debounceDuration = 10000;
+    this.stateDict = {};
   }
 
   async createDocument(title: string): Promise<DocumentsDto> {
@@ -85,12 +91,14 @@ export class DocumentsBusiness {
     //   );
     //   throw new ConflictException('Document has been modified by another user');
     // }
-
-    if (!this.lastState) {
-      this.lastState = EditorState.create({
-        doc: schema.nodeFromJSON(document.content),
-        plugins: [],
-      });
+    if (!Object.keys(this.stateDict).includes(`${id}`)) {
+      this.stateDict[`${id}`] = {
+        state: EditorState.create({
+          doc: schema.nodeFromJSON(document.content),
+          plugins: [],
+        }),
+        timeout: null,
+      };
     }
 
     try {
@@ -100,17 +108,19 @@ export class DocumentsBusiness {
       });
 
       const newTransaction = receivedState.tr;
-      newTransaction.doc = this.lastState.doc;
+      newTransaction.doc = this.stateDict[`${id}`].state.doc;
 
       steps.forEach((step) => newTransaction.step(Step.fromJSON(schema, step)));
-      this.lastState = this.lastState.apply(newTransaction);
+      this.stateDict[`${id}`].state =
+        this.stateDict[`${id}`].state.apply(newTransaction);
 
-      if (this.timeout) {
-        clearTimeout(this.timeout);
+      if (this.stateDict[`${id}`].timeout) {
+        clearTimeout(this.stateDict[`${id}`].timeout);
       }
-      this.timeout = setTimeout(async () => {
+
+      this.stateDict[`${id}`].timeout = setTimeout(async () => {
         document.version = Number(version) + 1;
-        document.content = this.lastState.doc.toJSON();
+        document.content = this.stateDict[`${id}`].state.doc.toJSON();
         document.updated_at = new Date();
 
         const newDoc = await this.repository.update(document);

@@ -8,6 +8,7 @@ import {schema} from "prosemirror-schema-basic"
 import '../Styles/prosemirror.css';
 import {DocumentDto, getDocument, saveDocument} from "../DataAccess/DocumentsDataAccess";
 import {socket} from "../Utils/Socket";
+import io from "socket.io-client";
 
 interface EditorProps {
     id: number;
@@ -15,15 +16,14 @@ interface EditorProps {
 
 export default function Editor({id} : EditorProps) {
     const [currentDocument, setCurrentDocument] = useState<DocumentDto>();
-
-
+    const skt = io("http://localhost:8080");
 
     useEffect(() => {
         getDocument(id).then((doc) => {
             setCurrentDocument(doc);
         });
 
-        socket.on("document_updated", (doc) => {
+        skt.on("document_updated", (doc) => {
             console.log("document updated")
             setCurrentDocument(doc);
         })
