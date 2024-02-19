@@ -1,12 +1,13 @@
 import {useEffect, useState} from "react";
-import {Schema, DOMParser} from "prosemirror-model"
-import {EditorState, Transaction, TextSelection} from "prosemirror-state"
+import {Schema} from "prosemirror-model"
+import {EditorState} from "prosemirror-state"
 import {EditorView} from "prosemirror-view"
 import {addListNodes} from "prosemirror-schema-list"
 import {exampleSetup} from "prosemirror-example-setup"
 import {schema} from "prosemirror-schema-basic"
 import '../Styles/prosemirror.css';
-import {DocumentDto, getDocument, saveDocument, updateDocument} from "../DataAccess/DocumentsDataAccess";
+import {DocumentDto, getDocument, saveDocument} from "../DataAccess/DocumentsDataAccess";
+import {socket} from "../Utils/Socket";
 
 interface EditorProps {
     id: number;
@@ -14,14 +15,23 @@ interface EditorProps {
 
 export default function Editor({id} : EditorProps) {
     const [currentDocument, setCurrentDocument] = useState<DocumentDto>();
+
+
+
     useEffect(() => {
         getDocument(id).then((doc) => {
             setCurrentDocument(doc);
-            // setCurrentVersion(Number(doc.version));
         });
+
+        socket.on("document_updated", (doc) => {
+            console.log("document updated")
+            setCurrentDocument(doc);
+        })
+
     }, []);
 
     useEffect(() => {
+
         if (currentDocument !== undefined)
         {
             const mySchema = new Schema({
@@ -50,7 +60,6 @@ export default function Editor({id} : EditorProps) {
             };
         }
     }, [currentDocument]);
-
 
     return (
         <div>

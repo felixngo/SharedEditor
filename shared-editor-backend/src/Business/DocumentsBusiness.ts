@@ -6,6 +6,7 @@ import { Schema } from 'prosemirror-model';
 import { addListNodes } from 'prosemirror-schema-list';
 import { schema } from 'prosemirror-schema-basic';
 import { Step } from 'prosemirror-transform';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class DocumentsBusiness {
@@ -68,6 +69,7 @@ export class DocumentsBusiness {
   }
 
   async saveChanges(
+    socket: Socket,
     id: number,
     newState: JSON,
     steps: JSON[],
@@ -111,7 +113,8 @@ export class DocumentsBusiness {
         document.content = this.lastState.doc.toJSON();
         document.updated_at = new Date();
 
-        await this.repository.update(document);
+        const newDoc = await this.repository.update(document);
+        socket.broadcast.emit('document_updated', newDoc);
       }, this.debounceDuration);
 
       Logger.log(

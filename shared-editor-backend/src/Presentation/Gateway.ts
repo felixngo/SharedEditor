@@ -1,12 +1,13 @@
 import { Inject, Logger, NotFoundException } from '@nestjs/common';
 import {
+  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { DocumentsBusiness } from '../Business/DocumentsBusiness';
 import { Transaction, Selection } from 'prosemirror-state';
 
@@ -65,6 +66,7 @@ export class Gateway {
 
   @SubscribeMessage('save_document')
   async saveDocument(
+    @ConnectedSocket() client: Socket,
     @MessageBody('id') id: number,
     @MessageBody('newState') newState: JSON,
     @MessageBody('steps') steps: JSON[],
@@ -73,6 +75,7 @@ export class Gateway {
     Logger.log('[PRESENTATION] Received Save request');
 
     const response = await this.business.saveChanges(
+      client,
       id,
       newState,
       steps,

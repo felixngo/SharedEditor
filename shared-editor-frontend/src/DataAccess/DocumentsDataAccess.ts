@@ -2,6 +2,7 @@ import io from 'socket.io-client';
 import axios from "axios";
 import AppConstants from "../Utils/AppConstants";
 import {Selection, Transaction} from 'prosemirror-state';
+import {socket} from "../Utils/Socket";
 
 export interface DocumentDto {
     id: number;
@@ -46,24 +47,11 @@ export async function getDocument(id: number) : Promise<DocumentDto> {
     }
 }
 
-// export function saveDocument(id: number, transaction: Transaction, selection: Selection,  version: number) {
-//     const socket = io('http://localhost:8080');
-//     socket.emit('save_document', {
-//         id : id,
-//         transaction: transaction,
-//         selection: selection,
-//         version: version
-//     });
-//     // socket.close();
-// }
-
 export function saveDocument(id: number,newNode: JSON, steps: JSON[], version: number) {
-    const socket = io('http://localhost:8080');
     socket.emit('save_document', {
         id : id,
         newState: newNode,
         steps: steps,
         version: version
     });
-    // socket.close();
 }
