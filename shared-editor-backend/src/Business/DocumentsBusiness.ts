@@ -65,80 +65,6 @@ export class DocumentsBusiness {
     return await this.repository.update(dto);
   }
 
-  // async saveChanges(
-  //   id: number,
-  //   transaction: Transaction,
-  //   selection: Selection,
-  //   version: number,
-  // ): Promise<DocumentsDto> {
-  //   Logger.log(`[Business] Saving changes for document with id ${id}`);
-  //
-  //   const document = await this.repository.getById(id);
-  //
-  //   if (document.version !== version) {
-  //     Logger.error('[Business] Document has been modified by another user');
-  //     throw new ConflictException('Document has been modified by another user');
-  //   }
-  //
-  //   const state = EditorState.create({
-  //     doc: schema.nodeFromJSON(document.content),
-  //     plugins: [],
-  //   });
-  //
-  //   console.log(JSON.stringify(state));
-  //
-  //   if (!state) {
-  //     Logger.error('[Business] EditorState is undefined');
-  //     throw new Error();
-  //   }
-  //
-  //   try {
-  //     Logger.log(
-  //       `[Business] Applying transaction ${JSON.stringify(transaction)}`,
-  //     );
-  //
-  //     // console.log(selection);
-  //     //
-  //     // const newTransaction = new Transaction(transaction.doc);
-  //     // const transactionWithSelection = this.addSelectionInfo(
-  //     //   newTransaction,
-  //     //   state,
-  //     // );
-  //     // Logger.log(`[Business] Selection added to transaction`);
-  //     // console.log(transactionWithSelection.selection);
-  //     // // console.log(schema.nodeFromJSON(document.content).eq);
-  //     //
-  //     // const newState = state.apply(transactionWithSelection);
-  //     // Logger.log(`[Business] New state`);
-  //
-  //     const newTransaction = state.tr;
-  //     newTransaction.doc = schema.nodeFromJSON(document.content);
-  //     // transaction.steps.forEach((step) => newTransaction.step(step));
-  //     transaction.setMeta('selection', {
-  //       from: selection.from,
-  //       to: selection.to,
-  //     });
-  //
-  //     newTransaction.setSelection(selection);
-  //
-  //     const newState = state.apply(newTransaction);
-  //
-  //     document.version = version + 1;
-  //     document.content = newState.doc.toJSON();
-  //
-  //     console.log(newState.doc.toJSON());
-  //
-  //     document.updated_at = new Date();
-  //
-  //     return await this.repository.update(document);
-  //   } catch (error) {
-  //     Logger.error(
-  //       '[Business] An error occurred while saving changes ' + error,
-  //     );
-  //     throw error;
-  //   }
-  // }
-
   async saveChanges(
     id: number,
     newState: JSON,
@@ -162,12 +88,12 @@ export class DocumentsBusiness {
     });
 
     try {
-      const st = EditorState.create({
+      const receivedState = EditorState.create({
         doc: schema.nodeFromJSON(newState),
         plugins: [],
       });
 
-      const newTransaction = st.tr;
+      const newTransaction = receivedState.tr;
       newTransaction.doc = schema.nodeFromJSON(document.content);
 
       steps.forEach((step) => newTransaction.step(Step.fromJSON(schema, step)));
@@ -188,28 +114,5 @@ export class DocumentsBusiness {
       );
       throw error;
     }
-  }
-
-  addSelectionInfo(transaction: Transaction, state: EditorState) {
-    // Check if the transaction has a selection
-    if (transaction.selection) {
-      // Add selection information to the transaction metadata
-      transaction.setMeta('selection', {
-        from: transaction.selection.from,
-        to: transaction.selection.to,
-      });
-    } else {
-      // If no selection in the transaction, use the current selection from the state
-      const selection = state.selection;
-      console.log({ test: selection });
-      transaction.setMeta('selection', {
-        from: selection.from,
-        to: selection.to,
-      });
-
-      transaction.setSelection(selection);
-    }
-
-    return transaction;
   }
 }
