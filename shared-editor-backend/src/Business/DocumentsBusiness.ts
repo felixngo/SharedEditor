@@ -1,18 +1,19 @@
 import { ConflictException, Inject, Injectable, Logger } from '@nestjs/common';
 import { DocumentsRepository } from '../DataAccess/Repositories/DocumentsRepository';
 import { DocumentsDto } from '../Models/Dto/documentsDto';
-import { exampleSetup } from 'prosemirror-example-setup';
-import { EditorState, Selection } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 import { addListNodes } from 'prosemirror-schema-list';
 import { schema } from 'prosemirror-schema-basic';
-import { Transaction } from 'prosemirror-state';
 import { Step } from 'prosemirror-transform';
 
 @Injectable()
 export class DocumentsBusiness {
   repository: DocumentsRepository;
   schema: Schema;
+  debounceDuration: number;
+  lastState: EditorState | null;
+  timeout: NodeJS.Timeout | null;
 
   constructor(@Inject(DocumentsRepository) repository) {
     this.repository = repository;
@@ -20,6 +21,7 @@ export class DocumentsBusiness {
       nodes: addListNodes(schema.spec.nodes, 'paragraph block*', 'block'),
       marks: schema.spec.marks,
     });
+    this.debounceDuration = 10000;
   }
 
   async createDocument(title: string): Promise<DocumentsDto> {
@@ -82,10 +84,12 @@ export class DocumentsBusiness {
     //   throw new ConflictException('Document has been modified by another user');
     // }
 
-    const state = EditorState.create({
-      doc: schema.nodeFromJSON(document.content),
-      plugins: [],
-    });
+    if (!this.lastState) {
+      this.lastState = EditorState.create({
+        doc: schema.nodeFromJSON(document.content),
+        plugins: [],
+      });
+    }
 
     try {
       const receivedState = EditorState.create({
@@ -94,20 +98,25 @@ export class DocumentsBusiness {
       });
 
       const newTransaction = receivedState.tr;
-      newTransaction.doc = schema.nodeFromJSON(document.content);
+      newTransaction.doc = this.lastState.doc;
 
       steps.forEach((step) => newTransaction.step(Step.fromJSON(schema, step)));
+      this.lastState = this.lastState.apply(newTransaction);
 
-      state.apply(newTransaction);
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      this.timeout = setTimeout(async () => {
+        document.version = Number(version) + 1;
+        document.content = this.lastState.doc.toJSON();
+        document.updated_at = new Date();
+
+        await this.repository.update(document);
+      }, this.debounceDuration);
+
       Logger.log(
         `[Business] New state version : ${document.version} : ${document.version + 1}}`,
       );
-
-      document.version = Number(version) + 1;
-      document.content = newTransaction.doc.toJSON();
-      document.updated_at = new Date();
-
-      return await this.repository.update(document);
     } catch (error) {
       Logger.error(
         '[Business] An error occurred while saving changes ' + error,
