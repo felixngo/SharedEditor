@@ -7,6 +7,7 @@ export interface documentsAttributes {
   content: JSON;
   createdAt?: Date;
   updatedAt?: Date;
+  version?: number;
 }
 
 export type documentsPk = 'id';
@@ -26,6 +27,7 @@ export class DocumentsEntity
   content!: JSON;
   createdAt?: Date;
   updatedAt?: Date;
+  version?: number;
 
   static initModel(sequelize: Sequelize.Sequelize): typeof DocumentsEntity {
     return DocumentsEntity.init(
@@ -53,6 +55,11 @@ export class DocumentsEntity
           type: DataTypes.DATE,
           allowNull: true,
           defaultValue: Date.now(),
+        },
+        version: {
+          type: DataTypes.BIGINT,
+          allowNull: true,
+          defaultValue: 1,
         },
       },
       {

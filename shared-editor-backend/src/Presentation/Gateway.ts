@@ -8,6 +8,7 @@ import {
 
 import { Server } from 'socket.io';
 import { DocumentsBusiness } from '../Business/DocumentsBusiness';
+import { Transaction, Selection } from 'prosemirror-state';
 
 @WebSocketGateway({
   cors: {
@@ -39,5 +40,43 @@ export class Gateway {
       }
       throw e;
     }
+  }
+  //
+  // @SubscribeMessage('save_document')
+  // async saveDocument(
+  //   @MessageBody('id') id: number,
+  //   @MessageBody('transaction') transaction: Transaction,
+  //   @MessageBody('selection') selection: Selection,
+  //   @MessageBody('version') version: number,
+  // ) {
+  //   Logger.log('[PRESENTATION] Received Save request');
+  //
+  //   console.log(JSON.stringify(transaction));
+  //   Logger.log(`[PRESENTATION] Received Save request with ${selection}`);
+  //   console.log(selection);
+  //
+  //   const response = await this.business.saveChanges(
+  //     id,
+  //     transaction as any,
+  //     selection as any,
+  //     version,
+  //   );
+  // }
+
+  @SubscribeMessage('save_document')
+  async saveDocument(
+    @MessageBody('id') id: number,
+    @MessageBody('newState') newState: JSON,
+    @MessageBody('steps') steps: JSON[],
+    @MessageBody('version') version: number,
+  ) {
+    Logger.log('[PRESENTATION] Received Save request');
+
+    const response = await this.business.saveChanges(
+      id,
+      newState,
+      steps,
+      version,
+    );
   }
 }

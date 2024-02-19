@@ -1,0 +1,65 @@
+{
+  "doc": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "s"
+          }
+        ]
+      }
+    ]
+  },
+  "steps": [
+    {
+      "stepType": "replace",
+      "from": 1,
+      "to": 1,
+      "slice": {
+        "content": [
+          {
+            "type": "text",
+            "text": "s"
+          }
+        ]
+      }
+    }
+  ],
+  "docs": [
+    {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph"
+        }
+      ]
+    }
+  ],
+  "mapping": {
+    "maps": [
+      {
+        "ranges": [
+          1,
+          0,
+          1
+        ],
+        "inverted": false
+      }
+    ],
+    "from": 0,
+    "to": 1
+  },
+  "curSelectionFor": 1,
+  "updated": 5,
+  "meta": {},
+  "time": 1708097695988,
+  "curSelection": {
+    "type": "text",
+    "anchor": 2,
+    "head": 2
+  },
+  "storedMarks": null
+}
